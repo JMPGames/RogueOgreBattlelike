@@ -34,7 +34,6 @@ public class BattleController : MonoBehaviour {
         turnList[currentTurn].StartTurn();
     }
 
-    //Build the turnList, sorted by entity speed *DESC
     void BuildTurnList() {
         turnList = new List<BattleEntity>();
         turnList = playerUnit.GetEntities().Concat(enemyUnit.GetEntities()).ToList();
@@ -74,12 +73,13 @@ public class BattleController : MonoBehaviour {
     }
 
     bool CheckIfUnitIsDead(BattleUnit unit) {
-        foreach(BattleEntity e in unit.GetEntities()) {
-            if (!e.IsDead()) {
-                return false;
+        int numberDead = 0;
+        foreach(BattleEntity entity in unit.GetEntities()) {
+            if (entity.IsDead()) {
+                numberDead++;
             }
         }
-        return true;
+        return numberDead >= unit.GetEntities().Length;
     }
 
     void IncrementTurn() {

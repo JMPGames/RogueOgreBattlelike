@@ -30,33 +30,38 @@ public class MapController : MonoBehaviour {
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
+                bool blocked = false;
+                bool isExit = false;
                 Vector3 position = new Vector2(x, y);
                 Tile tile = (Instantiate(tilePrefab, position, Quaternion.identity, transform) as GameObject).GetComponent<Tile>();
                 TileHelper tileHelper = tileHelpers.FirstOrDefault(th => th.transform.position == position);
 
                 if (tileHelper != null) {
-                    if (tileHelper.occupant != null) {
-                        tile.SetOccupant(tileHelper.occupant);
-                        DungeonController.instance.AddBattleUnit(tileHelper.occupant);
+                    if (!tileHelper.isExit) {
+                        if (tileHelper.occupant != null) {
+                            tile.Occupant = tileHelper.occupant;
+                            DungeonController.instance.AddBattleUnit(tileHelper.occupant);
+                        }
+                        blocked = true;
+                    }
+                    else {
+                        isExit = true;
                     }
                     tileHelper.gameObject.SetActive(false);
                 }
 
-                bool blocked = tileHelper != null ? true : OuterWallCheck(x, y);
+                bool isOuterWall = (x == 0 || x == width || y == 0 || y == height);
+                blocked = blocked == true ? true : isOuterWall;
                 if (!blocked) {
                     if (trapsSet < maxTraps && Random.Range(1, 101) <= trapChance) {
-                        GameObject trap = Instantiate(trapPrefabs[Random.Range(0, trapPrefabs.Length)], position, Quaternion.identity, transform) as GameObject;
-                        tile.SetTrap(trap);
+                        //GameObject trap = Instantiate(trapPrefabs[Random.Range(0, trapPrefabs.Length)], position, Quaternion.identity, transform) as GameObject;
+                        //tile.Trap = trap;
                     }
                 }
 
-                tile.Initialize(x, y, blocked);
+                tile.Initialize(x, y, blocked, isExit);
                 tileGrid[x, y] = tile;                
             }
         }
-    }
-
-    bool OuterWallCheck(int x, int y) {
-        return x < 0 || x > width || y < 0 || y > height;
     }
 }
