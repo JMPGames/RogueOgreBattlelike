@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum DungeonState { PLAYERTURN, ENEMYTURN, BATTLE }
+public enum DungeonState { PAUSED, PLAYERTURN, ENEMYTURN, BATTLE }
 
 [RequireComponent(typeof(BattleController))]
 [RequireComponent(typeof(MapController))]
 public class DungeonController : MonoBehaviour {
     public static DungeonController instance;
-    public DungeonState BattleState { get; private set; }
-    List<GameObject> battleUnits = new List<GameObject>();
+    public DungeonState DungeonState { get; private set; }
+    public List<GameObject> battleUnits = new List<GameObject>();
+
+    DungeonState previousState;
+    int turn;
 
     void Awake() {
         if (instance == null) {
@@ -18,25 +21,36 @@ public class DungeonController : MonoBehaviour {
         else if (instance != this) {
             Destroy(gameObject);
         }
+        DungeonState = DungeonState.PAUSED;
     }
 
-    void Start() {
-        BattleState = DungeonState.PLAYERTURN;
+    public void MapLoaded() {
+        turn = 0;
+        DungeonState = DungeonState.PLAYERTURN;
     }
 
     public void AddBattleUnit(GameObject unit) {
         battleUnits.Add(unit);
     }
 
+    public void StartBattle() {
+        previousState = DungeonState;
+        DungeonState = DungeonState.BATTLE;
+    }
+
+    public void EndBattle() {
+        DungeonState = previousState;
+    }
+
     public void EndPlayerTurn() {
-        BattleState = DungeonState.ENEMYTURN;
+        DungeonState = DungeonState.ENEMYTURN;
     }
 
     public void EndEnemyTurn() {
-        BattleState = DungeonState.PLAYERTURN;
+        DungeonState = DungeonState.PLAYERTURN;
     }
 
     public void GameOver() {
-
+        Debug.Log("GAMEOVER");
     }
 }

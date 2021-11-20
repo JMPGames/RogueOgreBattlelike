@@ -22,12 +22,13 @@ public class BattleController : MonoBehaviour {
         }
     }
 
-    public void StartBattle(BattleUnit playerUnit, BattleUnit enemyUnit) {
+    public void StartBattle(BattleUnit unitOne, BattleUnit unitTwo) {
+        DungeonController.instance.StartBattle();
         currentRound = 1;
         currentTurn = 0;
 
-        this.playerUnit = playerUnit;
-        this.enemyUnit = enemyUnit;
+        playerUnit = unitOne.IsPlayer ? unitOne : unitTwo;
+        enemyUnit  = unitOne.IsPlayer ? unitTwo : unitOne;
 
         BuildTurnList();
 

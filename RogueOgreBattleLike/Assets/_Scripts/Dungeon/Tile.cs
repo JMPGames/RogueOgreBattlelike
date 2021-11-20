@@ -15,12 +15,11 @@ public class Tile : MonoBehaviour {
     public int H { get; set; }
     public int F { get; set; }
 
-    public void Initialize(int x, int y, bool blocked = false, bool isExit = false, GameObject trap = null) {
+    public void Initialize(int x, int y, bool blocked, bool isExit) {
         X = x;
         Y = y;
         Blocked = blocked;
         IsAnExit = isExit;
-        Trap = trap;
     }
 
     public bool Occupied() {

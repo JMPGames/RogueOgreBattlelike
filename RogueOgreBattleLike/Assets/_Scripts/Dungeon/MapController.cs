@@ -1,27 +1,53 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 public class MapController : MonoBehaviour {
+    public static MapController instance;
+
     [SerializeField] GameObject tilePrefab;
     [SerializeField] int height;
     [SerializeField] int width;
     [SerializeField] int maxTraps;
+    [SerializeField] GameObject[] trapPrefabs;
     [Header("Note: 10 = 10% Chance")]
     [SerializeField] int trapChance = 10;
     [Header("Note: 'Player' TileHelper FIRST")]
     [SerializeField] TileHelper[] tileHelpers;
-    [SerializeField] GameObject[] trapPrefabs;
 
     Tile[,] tileGrid;
 
     void Awake() {
+        if (instance == null) {
+            instance = this;
+        }
+        else if (instance != this) {
+            Destroy(gameObject);
+        }
+    }
+
+    void Start() {
         MapGeneration();
     }
 
     public Tile GetTileAtPosition(int x, int y) {
         return tileGrid[x, y];
+    }
+
+    public bool TileAtPositionIsBlocked(int x, int y) {
+        return tileGrid[x, y].Blocked;
+    }
+
+    public bool CheckTileForBattleStart(int x, int y, bool player) {
+        Tile tileToCheck = tileGrid[x, y];
+        if (tileToCheck.Occupied()) {
+            if (player) {
+                return true;
+            }
+            else {
+                return tileToCheck.Occupant.GetComponent<BattleUnit>().IsPlayer;
+            }
+        }
+        return false;
     }
 
     void MapGeneration() {
@@ -39,8 +65,10 @@ public class MapController : MonoBehaviour {
                 if (tileHelper != null) {
                     if (!tileHelper.isExit) {
                         if (tileHelper.occupant != null) {
-                            tile.Occupant = tileHelper.occupant;
-                            DungeonController.instance.AddBattleUnit(tileHelper.occupant);
+                            GameObject unit = tileHelper.occupant;
+                            tile.Occupant = unit;
+                            DungeonController.instance.AddBattleUnit(unit);
+                            unit.GetComponent<BattleUnit>().InitializePosition(x, y);
                         }
                         blocked = true;
                     }
@@ -50,8 +78,7 @@ public class MapController : MonoBehaviour {
                     tileHelper.gameObject.SetActive(false);
                 }
 
-                bool isOuterWall = (x == 0 || x == width || y == 0 || y == height);
-                blocked = blocked == true ? true : isOuterWall;
+                blocked = blocked == true ? true : (x == 0 || x == width || y == 0 || y == height);
                 if (!blocked) {
                     if (trapsSet < maxTraps && Random.Range(1, 101) <= trapChance) {
                         //GameObject trap = Instantiate(trapPrefabs[Random.Range(0, trapPrefabs.Length)], position, Quaternion.identity, transform) as GameObject;
@@ -63,5 +90,6 @@ public class MapController : MonoBehaviour {
                 tileGrid[x, y] = tile;                
             }
         }
+        DungeonController.instance.MapLoaded();
     }
 }
