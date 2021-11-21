@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum DungeonState { PAUSED, PLAYERTURN, ENEMYTURN, BATTLE }
+public enum DungeonState { PAUSED, MOVE, BATTLE }
 
 [RequireComponent(typeof(BattleController))]
 [RequireComponent(typeof(MapController))]
@@ -26,7 +26,8 @@ public class DungeonController : MonoBehaviour {
 
     public void MapLoaded() {
         turn = 0;
-        DungeonState = DungeonState.PLAYERTURN;
+        DungeonState = DungeonState.MOVE;
+        battleUnits[turn].GetComponent<BattleUnit>().StartTurn();
     }
 
     public void AddBattleUnit(GameObject unit) {
@@ -42,12 +43,12 @@ public class DungeonController : MonoBehaviour {
         DungeonState = previousState;
     }
 
-    public void EndPlayerTurn() {
-        DungeonState = DungeonState.ENEMYTURN;
-    }
-
-    public void EndEnemyTurn() {
-        DungeonState = DungeonState.PLAYERTURN;
+    public void EndTurn() {
+        turn++;
+        if (turn >= battleUnits.Count) {
+            turn = 0;
+        }
+        battleUnits[turn].GetComponent<BattleUnit>().StartTurn();
     }
 
     public void GameOver() {

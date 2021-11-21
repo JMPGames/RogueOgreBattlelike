@@ -143,6 +143,7 @@ GameObject:
   m_Component:
   - component: {fileID: 46977567}
   - component: {fileID: 46977566}
+  - component: {fileID: 46977568}
   m_Layer: 0
   m_Name: Enemy2
   m_TagString: Untagged
@@ -215,6 +216,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &46977568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 46977565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da08c730d0dae8b4fb8cca2a16c2d8ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entities:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1001 &127387583
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -334,6 +353,7 @@ GameObject:
   m_Component:
   - component: {fileID: 219697631}
   - component: {fileID: 219697630}
+  - component: {fileID: 219697632}
   m_Layer: 0
   m_Name: Enemy1
   m_TagString: Untagged
@@ -406,6 +426,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &219697632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219697629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da08c730d0dae8b4fb8cca2a16c2d8ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  entities:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1001 &363094374
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5569,7 +5607,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1067740874}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 40ade6d19d48d74419e9192bf6c09147, type: 3}
+  m_Script: {fileID: 11500000, guid: 8e5ae8c1654b28f4395b3092ff30de55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   entities:

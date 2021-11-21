@@ -10,6 +10,7 @@ public class BattleUnit : MonoBehaviour {
 
     public int X { get; private set; }
     public int Y { get; private set; }
+    public Vector2 PreBattleMoveDirection { get; private set; }
     public bool IsPlayer { get; protected set; }
 
     public BattleEntity[] GetEntities() => entities;
@@ -25,6 +26,7 @@ public class BattleUnit : MonoBehaviour {
         int newY = Y + y;
 
         if (MapController.instance.CheckTileForBattleStart(newX, newY, IsPlayer)) {
+            PreBattleMoveDirection = new Vector2(x, y);
             BattleUnit opponent = MapController.instance.GetTileAtPosition(newX, newY).GetComponent<BattleUnit>();
             BattleController.instance.StartBattle(this, opponent);
             return true;
@@ -50,6 +52,7 @@ public class BattleUnit : MonoBehaviour {
 
     public virtual void EndTurn() {
         TurnState = UnitTurnState.IDLE;
+        DungeonController.instance.EndTurn();
     }
 
     public void SetAsDead() {

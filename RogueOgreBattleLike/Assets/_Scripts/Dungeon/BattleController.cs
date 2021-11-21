@@ -12,6 +12,7 @@ public class BattleController : MonoBehaviour {
 
     int currentRound;
     int currentTurn;
+    bool playerIsAttacker;
 
     void Awake() {
         if (instance == null) {
@@ -22,13 +23,14 @@ public class BattleController : MonoBehaviour {
         }
     }
 
-    public void StartBattle(BattleUnit unitOne, BattleUnit unitTwo) {
+    public void StartBattle(BattleUnit attacker, BattleUnit defender) {
         DungeonController.instance.StartBattle();
         currentRound = 1;
         currentTurn = 0;
 
-        playerUnit = unitOne.IsPlayer ? unitOne : unitTwo;
-        enemyUnit  = unitOne.IsPlayer ? unitTwo : unitOne;
+        playerUnit = attacker.IsPlayer ? attacker : defender;
+        enemyUnit  = attacker.IsPlayer ? defender : attacker;
+        playerIsAttacker = attacker.IsPlayer;
 
         BuildTurnList();
 
@@ -43,6 +45,11 @@ public class BattleController : MonoBehaviour {
 
     void EndBattle(bool battleWon = false) {
         if (battleWon) {
+            if (playerIsAttacker) {
+                int x = (int)playerUnit.PreBattleMoveDirection.x;
+                int y = (int)playerUnit.PreBattleMoveDirection.y;
+                playerUnit.MoveInDirection(x, y);
+            }
             //earn items, remove unit from dungeon
         }
         //Close battle window and start DungeonController back up
@@ -63,10 +70,12 @@ public class BattleController : MonoBehaviour {
 
     bool BattleStatusCheck() {
         if (CheckIfUnitIsDead(playerUnit)) {
+            playerUnit.SetAsDead();
             DungeonController.instance.GameOver();
             return true;
         }
         else if (CheckIfUnitIsDead(enemyUnit)) {
+            enemyUnit.SetAsDead();
             EndBattle(true);
             return true;
         }
