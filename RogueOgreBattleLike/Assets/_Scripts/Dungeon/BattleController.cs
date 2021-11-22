@@ -6,6 +6,9 @@ public class BattleController : MonoBehaviour {
     public static BattleController instance;
     const int NumberOfRounds = 3;
 
+    [SerializeField] Vector2[] playerPositions;
+    [SerializeField] Vector2[] enemyPositions;
+
     List<BattleEntity> turnList = new List<BattleEntity>();
     BattleUnit playerUnit;
     BattleUnit enemyUnit;
@@ -31,24 +34,30 @@ public class BattleController : MonoBehaviour {
         enemyUnit  = attacker.IsPlayer ? defender : attacker;
 
         BuildTurnList();
+        PlaceEntities(playerUnit, playerPositions);
+        PlaceEntities(enemyUnit, enemyPositions);
 
         turnList[currentTurn].StartTurn();
     }
 
     void BuildTurnList() {
-        turnList = new List<BattleEntity>();
         turnList = playerUnit.GetEntities().Concat(enemyUnit.GetEntities()).ToList();
         turnList.Sort( (e1, e2) => e2.GetSpeed().CompareTo(e1.GetSpeed()) );
     }
 
+    void PlaceEntities(BattleUnit unit, Vector2[] positions) {
+        for (int i = 0; i < unit.GetEntities().Length; i++) {
+            unit.GetEntityAtPosition(i).transform.position = positions[i];
+        }
+    }
+
     void EndBattle(bool battleWon = false) {
         if (battleWon) {
-            int x = (int)playerUnit.PreBattleMoveDirection.x;
-            int y = (int)playerUnit.PreBattleMoveDirection.y;
-            playerUnit.MoveInDirection(x, y);
-            //earn items, remove unit from dungeon
+            //earn items, exp
         }
-        //Close battle window and start DungeonController back up
+        //Close battle window
+        DungeonController.instance.EndBattle();
+        turnList.Clear();
     }
 
     public void NextTurn() {
@@ -71,7 +80,10 @@ public class BattleController : MonoBehaviour {
             return true;
         }
         else if (CheckIfUnitIsDead(enemyUnit)) {
+            Debug.Log($"BATTLE WON  enemyUnit.name = {enemyUnit.name}");
             enemyUnit.SetAsDead();
+            DungeonController.instance.RemoveBattleUnit(enemyUnit.gameObject);
+            Destroy(enemyUnit.gameObject);
             EndBattle(true);
             return true;
         }

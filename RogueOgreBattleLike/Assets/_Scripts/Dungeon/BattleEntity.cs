@@ -11,12 +11,17 @@ public class BattleEntity : BaseEntity {
     public int GetSpeed() => speed;
     public bool IsDead() => Health <= 0;
 
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.A)) {
-            Debug.Log(GetTitle());
+    void Awake() {
+        Health = maxHealth;
+    }
+
+    public void LoseHealth(int amount) {
+        Health -= amount;
+        if (Health < 0) {
+            Health = 0;
         }
     }
 
-    public virtual void StartTurn() { }
+    public virtual void StartTurn() { Debug.Log($"{name}'s turn"); }
     public virtual void EndTurn() { }
 }

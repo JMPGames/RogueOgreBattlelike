@@ -37,9 +37,11 @@ public class EnemyUnit : BattleUnit {
     bool CheckForTarget() {
         float distance = Vector3.Distance(transform.position, target.position);
         if (!targetSighted && distance <= sightRange) {
+            DungeonLog.instance.CreateLog($"{name} ({X}, {Y}) has spotted you.", Color.yellow);
             targetSighted = true;
         }
         else if (targetSighted && distance > sightRange * LoseSightModifier) {
+            DungeonLog.instance.CreateLog($"{name} ({X}, {Y}) has lost sight of you.", Color.yellow);
             targetSighted = false;
         }
         return targetSighted;

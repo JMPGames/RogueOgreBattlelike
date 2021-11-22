@@ -9,9 +9,8 @@ public enum DungeonState { PAUSED, MOVE, BATTLE }
 public class DungeonController : MonoBehaviour {
     public static DungeonController instance;
     public DungeonState DungeonState { get; private set; }
-    public List<GameObject> battleUnits = new List<GameObject>();
+    List<GameObject> battleUnits = new List<GameObject>();
 
-    DungeonState previousState;
     int turn;
 
     void Awake() {
@@ -34,13 +33,17 @@ public class DungeonController : MonoBehaviour {
         battleUnits.Add(unit);
     }
 
+    public void RemoveBattleUnit(GameObject unit) {
+        battleUnits.Remove(unit);
+    }
+
     public void StartBattle() {
-        previousState = DungeonState;
         DungeonState = DungeonState.BATTLE;
     }
 
     public void EndBattle() {
-        DungeonState = previousState;
+        DungeonState = DungeonState.MOVE;
+        EndTurn();
     }
 
     public void EndTurn() {

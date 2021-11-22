@@ -5,7 +5,7 @@ using UnityEngine;
 public enum UnitTurnState { IDLE, ACTIVE, DEAD }
 
 public class BattleUnit : MonoBehaviour {
-    [SerializeField] BattleEntity[] entities = new BattleEntity[5];
+    [SerializeField] BattleEntity[] entities;
     public UnitTurnState TurnState { get; private set; }
 
     public int X { get; private set; }
@@ -27,7 +27,7 @@ public class BattleUnit : MonoBehaviour {
 
         if (MapController.instance.CheckTileForBattleStart(newX, newY, IsPlayer)) {
             PreBattleMoveDirection = new Vector2(x, y);
-            BattleUnit opponent = MapController.instance.GetTileAtPosition(newX, newY).GetComponent<BattleUnit>();
+            BattleUnit opponent = MapController.instance.GetTileAtPosition(newX, newY).Occupant.GetComponent<BattleUnit>();
             BattleController.instance.StartBattle(this, opponent);
             return true;
         }

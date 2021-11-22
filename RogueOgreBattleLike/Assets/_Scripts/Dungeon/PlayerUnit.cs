@@ -5,13 +5,17 @@ using UnityEngine;
 public enum InputState { INACTIVE, MENU, ACTION }
 
 public class PlayerUnit : BattleUnit {
-    public InputState inputState;
+    InputState inputState;
 
     void Start() {
         IsPlayer = true;
     }
 
     void Update() {
+        if (Input.GetKeyDown(KeyCode.Q)) {
+            DungeonLog.instance.CreateLog("TEST", Color.green);
+        }
+
         if (TurnState == UnitTurnState.ACTIVE) {
             if (inputState == InputState.ACTION) {
                 ActionInput();
