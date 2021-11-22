@@ -42,5 +42,8 @@ public class PlayerUnit : BattleUnit {
         else if (Input.GetKeyDown(KeyCode.D)) {
             MoveInDirection(1, 0);
         }
+        else if (Input.GetKeyDown(KeyCode.Space)) {
+            EndTurn();
+        }
     }
 }

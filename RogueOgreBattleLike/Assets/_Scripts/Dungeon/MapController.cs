@@ -5,6 +5,7 @@ public class MapController : MonoBehaviour {
     public static MapController instance;
 
     [SerializeField] GameObject tilePrefab;
+    [Header("Note: width and height need to be the outer wall")]
     [SerializeField] int height;
     [SerializeField] int width;
     [SerializeField] int maxTraps;
@@ -15,6 +16,9 @@ public class MapController : MonoBehaviour {
     [SerializeField] TileHelper[] tileHelpers;
 
     Tile[,] tileGrid;
+
+    public int GetHeight() => height;
+    public int GetWidth() => width;
 
     void Awake() {
         if (instance == null) {
@@ -52,10 +56,10 @@ public class MapController : MonoBehaviour {
 
     void MapGeneration() {
         int trapsSet = 0;
-        tileGrid = new Tile[width, height];
+        tileGrid = new Tile[width + 1, height + 1];
 
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width + 1; x++) {
+            for (int y = 0; y < height + 1; y++) {
                 bool blocked = false;
                 bool isExit = false;
                 Vector3 position = new Vector2(x, y);
@@ -70,7 +74,9 @@ public class MapController : MonoBehaviour {
                             DungeonController.instance.AddBattleUnit(unit);
                             unit.GetComponent<BattleUnit>().InitializePosition(x, y);
                         }
-                        blocked = true;
+                        else {
+                            blocked = true;
+                        }
                     }
                     else {
                         isExit = true;

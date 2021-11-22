@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Tile : MonoBehaviour {
     public int X { get; private set; }
@@ -13,9 +11,10 @@ public class Tile : MonoBehaviour {
     public Tile Previous { get; set; }
     public int G { get; set; }
     public int H { get; set; }
-    public int F { get; set; }
+    public int F { get { return G + H; } }
 
     public void Initialize(int x, int y, bool blocked, bool isExit) {
+        gameObject.name = $"Tile({x}, {y})";
         X = x;
         Y = y;
         Blocked = blocked;
@@ -32,6 +31,5 @@ public class Tile : MonoBehaviour {
 
     public void Move(GameObject entity = null) {
         Occupant = entity;
-        Blocked = entity != null;
     }
 }

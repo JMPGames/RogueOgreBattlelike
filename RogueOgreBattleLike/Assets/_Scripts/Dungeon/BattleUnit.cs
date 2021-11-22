@@ -33,6 +33,9 @@ public class BattleUnit : MonoBehaviour {
         }
 
         if (MapController.instance.TileAtPositionIsBlocked(newX, newY)) {
+            if (!IsPlayer) {
+                EndTurn();
+            }
             return false;
         }
 
