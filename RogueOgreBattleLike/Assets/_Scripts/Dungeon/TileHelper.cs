@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
 public class TileHelper : MonoBehaviour {
-    public GameObject occupant;    
-    public bool isExit;
+    public GameObject Occupant;    
+    public bool IsExit;
 }

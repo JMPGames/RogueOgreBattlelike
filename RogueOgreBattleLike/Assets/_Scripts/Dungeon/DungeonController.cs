@@ -7,34 +7,24 @@ public enum DungeonState { PAUSED, MOVE, BATTLE }
 [RequireComponent(typeof(BattleController))]
 [RequireComponent(typeof(MapController))]
 public class DungeonController : MonoBehaviour {
-    public static DungeonController instance;
+    public static DungeonController Instance;
     public DungeonState DungeonState { get; private set; }
-    List<GameObject> battleUnits = new List<GameObject>();
 
-    int turn;
-
-    void Awake() {
-        if (instance == null) {
-            instance = this;
-        }
-        else if (instance != this) {
-            Destroy(gameObject);
-        }
-        DungeonState = DungeonState.PAUSED;
-    }
+    List<GameObject> _battleUnits = new List<GameObject>();
+    int _turn;
 
     public void MapLoaded() {
-        turn = 0;
+        _turn = 0;
         DungeonState = DungeonState.MOVE;
-        battleUnits[turn].GetComponent<BattleUnit>().StartTurn();
+        _battleUnits[_turn].GetComponent<BattleUnit>().StartTurn();
     }
 
     public void AddBattleUnit(GameObject unit) {
-        battleUnits.Add(unit);
+        _battleUnits.Add(unit);
     }
 
     public void RemoveBattleUnit(GameObject unit) {
-        battleUnits.Remove(unit);
+        _battleUnits.Remove(unit);
     }
 
     public void StartBattle() {
@@ -47,14 +37,24 @@ public class DungeonController : MonoBehaviour {
     }
 
     public void EndTurn() {
-        turn++;
-        if (turn >= battleUnits.Count) {
-            turn = 0;
+        _turn++;
+        if (_turn >= _battleUnits.Count) {
+            _turn = 0;
         }
-        battleUnits[turn].GetComponent<BattleUnit>().StartTurn();
+        _battleUnits[_turn].GetComponent<BattleUnit>().StartTurn();
     }
 
     public void GameOver() {
         Debug.Log("GAMEOVER");
+    }
+
+    void Awake() {
+        if (Instance == null) {
+            Instance = this;
+        }
+        else if (Instance != this) {
+            Destroy(gameObject);
+        }
+        DungeonState = DungeonState.PAUSED;
     }
 }

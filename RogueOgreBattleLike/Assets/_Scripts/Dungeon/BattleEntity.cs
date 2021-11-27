@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class BattleEntity : BaseEntity {
     //[SerializeField] Skill[] skills = new Skill[4];
-    [SerializeField] int maxHealth;
-    [SerializeField] int speed;
+    [SerializeField] int _maxHealth;
+    [SerializeField] int _speed;
 
     public int Health { get; private set; }
-    public int GetSpeed() => speed;
+    public int GetSpeed() => _speed;
     public bool IsDead() => Health <= 0;
 
     void Awake() {
-        Health = maxHealth;
+        Health = _maxHealth;
     }
 
     public void LoseHealth(int amount) {

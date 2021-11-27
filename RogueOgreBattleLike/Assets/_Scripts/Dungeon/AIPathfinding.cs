@@ -2,39 +2,34 @@
 using UnityEngine;
 
 public class AIPathfinding : MonoBehaviour {
-    const int MoveDiagonalCost = 20;
-    const int MoveCost = 10;
+    const int MOVE_DIAGONAL_COST = 20;
+    const int MOVE_COST = 10;
 
     public Tile Path(int startX, int startY, int endX, int endY) {
         List<Tile> path = FindPath(startX, startY, endX, endY);
 
         //UNCOMMENT IF DUNGEON MOVEMENT ISN'T LOCKED TO ONE MOVE PER TURN
-            //Function output needs to be switched to List<Tile>
-            //return path == null ? null : path;
+        //Function output needs to be switched to List<Tile>
+        //return path == null ? null : path;
         //-------------------------------------------------------------
 
         //REMOVE IF DUNGEON MOVEMENT ISN'T LOCKED TO ONE MOVE PER TURN
-        if (path == null) {
-            return null;
-        }
-        else {
-            //return index 1, since index 0 is the AI's current tile
-            return path[1];
-        }
+        //Return path[1], path[0] is this entities current tile
+        return path == null ? null : path[1];
         //-------------------------------------------------------------
     }
 
-    List<Tile> FindPath(int curX, int curY, int playerX, int playerY) {
-        Tile startTile = MapController.instance.GetTileAtPosition(curX, curY);
-        Tile endTile = MapController.instance.GetTileAtPosition(playerX, playerY);
+    List<Tile> FindPath(int currentX, int currentY, int playerX, int playerY) {
+        Tile startTile = MapController.Instance.GetTileAtPosition(currentX, currentY);
+        Tile endTile = MapController.Instance.GetTileAtPosition(playerX, playerY);
 
-        List<Tile> open = new List<Tile> { startTile };
-        List<Tile> closed = new List<Tile>();
+        List<Tile> openList = new List<Tile> { startTile };
+        List<Tile> closedList = new List<Tile>();
 
         //Reset all tile values
-        for (int x = 0; x < MapController.instance.GetWidth() + 1; x++) {
-            for (int y = 0; y < MapController.instance.GetHeight() + 1; y++) {
-                Tile tile = MapController.instance.GetTileAtPosition(x, y);
+        for (int x = 0; x < MapController.Instance.GetWidth() + 1; x++) {
+            for (int y = 0; y < MapController.Instance.GetHeight() + 1; y++) {
+                Tile tile = MapController.Instance.GetTileAtPosition(x, y);
                 tile.G = int.MaxValue;
                 tile.Previous = null;
             }
@@ -43,26 +38,24 @@ public class AIPathfinding : MonoBehaviour {
         startTile.G = 0;
         startTile.H = CalculateDistanceCost(startTile, endTile);
 
-        int iteration = 0;
         Tile currentTile = null;
 
-        while (open.Count > 0) {
-            iteration++;
-            currentTile = GetLowestFCostNode(open);
+        while (openList.Count > 0) {
+            currentTile = GetLowestFCostNode(openList);
 
             if (currentTile == endTile) {
                 return CalculatePath(endTile);
             }
 
-            open.Remove(currentTile);
-            closed.Add(currentTile);
+            openList.Remove(currentTile);
+            closedList.Add(currentTile);
 
             foreach (Tile neighbor in GetAdjacentTiles(currentTile)) {
-                if (closed.Contains(neighbor)) {
+                if (closedList.Contains(neighbor)) {
                     continue;
                 }
-                if (MapController.instance.TileAtPositionIsBlocked(neighbor.X, neighbor.Y)) {
-                    closed.Add(neighbor);
+                if (MapController.Instance.TileAtPositionIsBlocked(neighbor.X, neighbor.Y)) {
+                    closedList.Add(neighbor);
                     continue;
                 }
 
@@ -72,8 +65,8 @@ public class AIPathfinding : MonoBehaviour {
                     neighbor.G = tentativeGCost;
                     neighbor.H = CalculateDistanceCost(neighbor, endTile);
 
-                    if (!open.Contains(neighbor)) {
-                        open.Add(neighbor);
+                    if (!openList.Contains(neighbor)) {
+                        openList.Add(neighbor);
                     }
                 }
             }
@@ -84,13 +77,15 @@ public class AIPathfinding : MonoBehaviour {
 
     List<Tile> CalculatePath(Tile endTile) {
         List<Tile> path = new List<Tile>();
-        path.Add(endTile);
         Tile currentTile = endTile;
+
+        path.Add(endTile);
 
         while (currentTile.Previous != null) {
             path.Add(currentTile.Previous);
             currentTile = currentTile.Previous;
         }
+
         path.Reverse();
         return path;
     }
@@ -99,16 +94,16 @@ public class AIPathfinding : MonoBehaviour {
         List<Tile> tiles = new List<Tile>();
 
         if (tile.X - 1 >= 0) {
-            tiles.Add(MapController.instance.GetTileAtPosition(tile.X - 1, tile.Y));
+            tiles.Add(MapController.Instance.GetTileAtPosition(tile.X - 1, tile.Y));
         }
-        if (tile.X + 1 < MapController.instance.GetWidth() + 1) {
-            tiles.Add(MapController.instance.GetTileAtPosition(tile.X + 1, tile.Y));
+        if (tile.X + 1 < MapController.Instance.GetWidth() + 1) {
+            tiles.Add(MapController.Instance.GetTileAtPosition(tile.X + 1, tile.Y));
         }
         if (tile.Y - 1 >= 0) {
-            tiles.Add(MapController.instance.GetTileAtPosition(tile.X, tile.Y - 1));
+            tiles.Add(MapController.Instance.GetTileAtPosition(tile.X, tile.Y - 1));
         }
-        if (tile.Y + 1 < MapController.instance.GetHeight() + 1) {
-            tiles.Add(MapController.instance.GetTileAtPosition(tile.X, tile.Y + 1));
+        if (tile.Y + 1 < MapController.Instance.GetHeight() + 1) {
+            tiles.Add(MapController.Instance.GetTileAtPosition(tile.X, tile.Y + 1));
         }
         return tiles;
     }
@@ -117,12 +112,12 @@ public class AIPathfinding : MonoBehaviour {
         int xDistance = Mathf.Abs(a.X - b.X);
         int yDistance = Mathf.Abs(a.Y - b.Y);
 
-        int remaining = Mathf.Abs(xDistance - yDistance);
-        return MoveDiagonalCost * Mathf.Min(xDistance, yDistance) + MoveCost * remaining;
+        return MOVE_DIAGONAL_COST * Mathf.Min(xDistance, yDistance) + MOVE_COST * Mathf.Abs(xDistance - yDistance);
     }
 
     Tile GetLowestFCostNode(List<Tile> tiles) {
         Tile tile = tiles[0];
+
         for (int i = 0; i < tiles.Count; i++) {
             if (tiles[i].F < tile.F) {
                 tile = tiles[i];

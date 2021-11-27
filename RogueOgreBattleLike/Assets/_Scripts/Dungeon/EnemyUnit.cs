@@ -5,22 +5,22 @@ using UnityEngine;
 [RequireComponent(typeof(AIPathfinding))]
 [RequireComponent(typeof(AIPatrolController))]
 public class EnemyUnit : BattleUnit {
-    const int RandomPatrolChance = 30;
-    const float LoseSightModifier = 1.5f;
+    const int RANDOM_PATROL_CHANCE = 30;
+    const float LOSE_SIGHT_MODIFIER = 1.5f;
 
-    [SerializeField] float sightRange;
-    AIPathfinding pathFinding;
-    AIPatrolController patrolController;
-    Transform target;
-    bool targetSighted;
-    (int, int) lastMove;
+    [SerializeField] float _sightRange;
+    AIPathfinding _pathFinding;
+    AIPatrolController _patrolController;
+    Transform _target;
+    bool _targetSighted;
+    (int, int) _lastMove;
 
     void Start() {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
-        pathFinding = GetComponent<AIPathfinding>();
-        patrolController = GetComponent<AIPatrolController>();
+        _target = GameObject.FindGameObjectWithTag("Player").transform;
+        _pathFinding = GetComponent<AIPathfinding>();
+        _patrolController = GetComponent<AIPatrolController>();
         IsPlayer = false;
-        lastMove = (0, 1);
+        _lastMove = (0, 1);
     }
 
     public override void StartTurn() {
@@ -35,24 +35,24 @@ public class EnemyUnit : BattleUnit {
     }
 
     bool CheckForTarget() {
-        float distance = Vector3.Distance(transform.position, target.position);
-        if (!targetSighted && distance <= sightRange) {
-            DungeonLog.instance.CreateLog($"{name} ({X}, {Y}) has spotted you.", Color.yellow);
-            targetSighted = true;
+        float distance = Vector3.Distance(transform.position, _target.position);
+        if (!_targetSighted && distance <= _sightRange) {
+            DungeonLog.Instance.CreateLog($"{name} ({X}, {Y}) has spotted you.", Color.yellow);
+            _targetSighted = true;
         }
-        else if (targetSighted && distance > sightRange * LoseSightModifier) {
-            DungeonLog.instance.CreateLog($"{name} ({X}, {Y}) has lost sight of you.", Color.yellow);
-            targetSighted = false;
+        else if (_targetSighted && distance > _sightRange * LOSE_SIGHT_MODIFIER) {
+            DungeonLog.Instance.CreateLog($"{name} ({X}, {Y}) has lost sight of you.", Color.yellow);
+            _targetSighted = false;
         }
-        return targetSighted;
+        return _targetSighted;
     }
 
     void MoveTowardsTarget() {
-        BattleUnit playerUnit = target.GetComponent<BattleUnit>();
-        Tile path = pathFinding.Path(X, Y, playerUnit.X, playerUnit.Y);
+        BattleUnit playerUnit = _target.GetComponent<BattleUnit>();
+        Tile path = _pathFinding.Path(X, Y, playerUnit.X, playerUnit.Y);
         if (path != null) {
-            lastMove = (path.X - X, path.Y - Y);
-            MoveInDirection(lastMove.Item1, lastMove.Item2);
+            _lastMove = (path.X - X, path.Y - Y);
+            MoveInDirection(_lastMove.Item1, _lastMove.Item2);
         }
         else {
             PatrolMovement();
@@ -60,9 +60,9 @@ public class EnemyUnit : BattleUnit {
     }
 
     void PatrolMovement() {
-        bool calculatedPatrol = Random.Range(1, 101) > RandomPatrolChance;
-        (int, int) direction = calculatedPatrol ? patrolController.CalculatePatrolPath(X, Y, lastMove) : patrolController.RandomPatrol();
-        lastMove = direction;
+        bool calculatedPatrol = Random.Range(1, 101) > RANDOM_PATROL_CHANCE;
+        (int, int) direction = calculatedPatrol ? _patrolController.CalculatePatrolPath(X, Y, _lastMove) : _patrolController.RandomPatrol();
+        _lastMove = direction;
         MoveInDirection(direction.Item1, direction.Item2);
     }
 }

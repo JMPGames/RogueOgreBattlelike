@@ -5,7 +5,7 @@ using UnityEngine;
 public enum UnitTurnState { IDLE, ACTIVE, DEAD }
 
 public class BattleUnit : MonoBehaviour {
-    [SerializeField] BattleEntity[] entities;
+    [SerializeField] BattleEntity[] _entities;
     public UnitTurnState TurnState { get; private set; }
 
     public int X { get; private set; }
@@ -13,8 +13,8 @@ public class BattleUnit : MonoBehaviour {
     public Vector2 PreBattleMoveDirection { get; private set; }
     public bool IsPlayer { get; protected set; }
 
-    public BattleEntity[] GetEntities() => entities;
-    public BattleEntity GetEntityAtPosition(int index) => entities[index];
+    public BattleEntity[] GetEntities() => _entities;
+    public BattleEntity GetEntityAtPosition(int index) => _entities[index];
 
     public void InitializePosition(int x, int y) {
         X = x;
@@ -25,26 +25,26 @@ public class BattleUnit : MonoBehaviour {
         int newX = X + x;
         int newY = Y + y;
 
-        if (MapController.instance.CheckTileForBattleStart(newX, newY, IsPlayer)) {
+        if (MapController.Instance.CheckTileForBattleStart(newX, newY, IsPlayer)) {
             PreBattleMoveDirection = new Vector2(x, y);
-            BattleUnit opponent = MapController.instance.GetTileAtPosition(newX, newY).Occupant.GetComponent<BattleUnit>();
-            BattleController.instance.StartBattle(this, opponent);
+            BattleUnit opponent = MapController.Instance.GetTileAtPosition(newX, newY).Occupant.GetComponent<BattleUnit>();
+            BattleController.Instance.StartBattle(this, opponent);
             return true;
         }
 
-        if (MapController.instance.TileAtPositionIsBlocked(newX, newY)) {
+        if (MapController.Instance.TileAtPositionIsBlocked(newX, newY)) {
             if (!IsPlayer) {
                 EndTurn();
             }
             return false;
         }
 
-        MapController.instance.GetTileAtPosition(X, Y).Move();
+        MapController.Instance.GetTileAtPosition(X, Y).Move();
         X = newX;
         Y = newY;
         //#TODO::Smooth movement
         transform.position = new Vector2(X, Y);
-        MapController.instance.GetTileAtPosition(X, Y).Move(gameObject);
+        MapController.Instance.GetTileAtPosition(X, Y).Move(gameObject);
         EndTurn();
         return true;
     }
@@ -55,7 +55,7 @@ public class BattleUnit : MonoBehaviour {
 
     public virtual void EndTurn() {
         TurnState = UnitTurnState.IDLE;
-        DungeonController.instance.EndTurn();
+        DungeonController.Instance.EndTurn();
     }
 
     public void SetAsDead() {

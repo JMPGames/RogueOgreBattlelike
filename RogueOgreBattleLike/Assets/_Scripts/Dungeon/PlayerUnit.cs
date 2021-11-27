@@ -5,31 +5,19 @@ using UnityEngine;
 public enum InputState { INACTIVE, MENU, ACTION }
 
 public class PlayerUnit : BattleUnit {
-    InputState inputState;
+    InputState _inputState;
 
     void Start() {
         IsPlayer = true;
     }
 
-    void Update() {
-        if (Input.GetKeyDown(KeyCode.Q)) {
-            DungeonLog.instance.CreateLog("TEST", Color.green);
-        }
-
-        if (TurnState == UnitTurnState.ACTIVE) {
-            if (inputState == InputState.ACTION) {
-                ActionInput();
-            }
-        }
-    }
-
     public override void StartTurn() {
-        inputState = InputState.ACTION;
+        _inputState = InputState.ACTION;
         base.StartTurn();
     }
 
     public override void EndTurn() {
-        inputState = InputState.INACTIVE;
+        _inputState = InputState.INACTIVE;
         base.EndTurn();
     }
 

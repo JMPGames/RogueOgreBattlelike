@@ -2,47 +2,38 @@
 using UnityEngine;
 
 public class MapController : MonoBehaviour {
-    public static MapController instance;
+    public static MapController Instance;
 
-    [SerializeField] GameObject tilePrefab;
+    [SerializeField] GameObject _tilePrefab;
     [Header("Note: width and height need to be the outer wall")]
-    [SerializeField] int height;
-    [SerializeField] int width;
-    [SerializeField] int maxTraps;
-    [SerializeField] GameObject[] trapPrefabs;
+    [SerializeField] int _height;
+    [SerializeField] int _width;
+    [SerializeField] int _maxTraps;
+    [SerializeField] GameObject[] _trapPrefabs;
     [Header("Note: 10 = 10% Chance")]
-    [SerializeField] int trapChance = 10;
+    [SerializeField] int _trapChance = 10;
     [Header("Note: 'Player' TileHelper FIRST")]
-    [SerializeField] TileHelper[] tileHelpers;
+    [SerializeField] TileHelper[] _tileHelpers;
 
-    Tile[,] tileGrid;
+    Tile[,] _tileGrid;
 
-    public int GetHeight() => height;
-    public int GetWidth() => width;
-
-    void Awake() {
-        if (instance == null) {
-            instance = this;
-        }
-        else if (instance != this) {
-            Destroy(gameObject);
-        }
-    }
+    public int GetHeight() => _height;
+    public int GetWidth() => _width;
 
     void Start() {
         MapGeneration();
     }
 
     public Tile GetTileAtPosition(int x, int y) {
-        return tileGrid[x, y];
+        return _tileGrid[x, y];
     }
 
     public bool TileAtPositionIsBlocked(int x, int y) {
-        return tileGrid[x, y].Blocked;
+        return _tileGrid[x, y].Blocked;
     }
 
     public bool CheckTileForBattleStart(int x, int y, bool player) {
-        Tile tileToCheck = tileGrid[x, y];
+        Tile tileToCheck = _tileGrid[x, y];
         if (tileToCheck.Occupied()) {
             if (player) {
                 return true;
@@ -56,46 +47,53 @@ public class MapController : MonoBehaviour {
 
     void MapGeneration() {
         int trapsSet = 0;
-        tileGrid = new Tile[width + 1, height + 1];
+        _tileGrid = new Tile[_width + 1, _height + 1];
 
-        for (int x = 0; x < width + 1; x++) {
-            for (int y = 0; y < height + 1; y++) {
+        for (int x = 0; x < _width + 1; x++) {
+            for (int y = 0; y < _height + 1; y++) {
                 bool blocked = false;
                 bool isExit = false;
                 Vector3 position = new Vector2(x, y);
-                Tile tile = (Instantiate(tilePrefab, position, Quaternion.identity, transform) as GameObject).GetComponent<Tile>();
-                TileHelper tileHelper = tileHelpers.FirstOrDefault(th => th.transform.position == position);
+                Tile tile = (Instantiate(_tilePrefab, position, Quaternion.identity, transform) as GameObject).GetComponent<Tile>();
+                TileHelper tileHelper = _tileHelpers.FirstOrDefault(th => th.transform.position == position);
 
                 if (tileHelper != null) {
-                    if (!tileHelper.isExit) {
-                        if (tileHelper.occupant != null) {
-                            GameObject unit = tileHelper.occupant;
+                    if (!tileHelper.IsExit) {
+                        if (tileHelper.Occupant != null) {
+                            GameObject unit = tileHelper.Occupant;
                             tile.Occupant = unit;
-                            DungeonController.instance.AddBattleUnit(unit);
+                            DungeonController.Instance.AddBattleUnit(unit);
                             unit.GetComponent<BattleUnit>().InitializePosition(x, y);
                         }
                         else {
                             blocked = true;
                         }
                     }
-                    else {
-                        isExit = true;
-                    }
+                    isExit = tileHelper.IsExit;
                     tileHelper.gameObject.SetActive(false);
                 }
 
-                blocked = blocked == true ? true : (x == 0 || x == width || y == 0 || y == height);
+                blocked = blocked == true ? true : (x == 0 || x == _width || y == 0 || y == _height);
                 if (!blocked) {
-                    if (trapsSet < maxTraps && Random.Range(1, 101) <= trapChance) {
+                    if (trapsSet < _maxTraps && Random.Range(1, 101) <= _trapChance) {
                         //GameObject trap = Instantiate(trapPrefabs[Random.Range(0, trapPrefabs.Length)], position, Quaternion.identity, transform) as GameObject;
                         //tile.Trap = trap;
                     }
                 }
 
                 tile.Initialize(x, y, blocked, isExit);
-                tileGrid[x, y] = tile;                
+                _tileGrid[x, y] = tile;                
             }
         }
-        DungeonController.instance.MapLoaded();
+        DungeonController.Instance.MapLoaded();
+    }
+
+    void Awake() {
+        if (Instance == null) {
+            Instance = this;
+        }
+        else if (Instance != this) {
+            Destroy(gameObject);
+        }
     }
 }
