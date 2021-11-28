@@ -1,33 +1,48 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 public class BattleController : MonoBehaviour {
     public static BattleController Instance;
-    const int NUMBER_OF_ROUNDS = 3;
+    const float END_BATTLE_SCREEN_TIME = 3.0f;
+    const int NUMBER_OF_ROUNDS = 1;
+    const int TILES_BETWEEN_TEAMS = 10;
+    const int PLAYER_POSITION_X = 95;
+    const int FIRST_POSITION_Y = 98;
 
-    [SerializeField] Vector2[] _playerPositions;
-    [SerializeField] Vector2[] _enemyPositions;
+    Camera _battleCamera;
+    Vector2[] _enemyPositions = new Vector2[5];
+    Vector2[] _playerPositions = new Vector2[5];
 
-    List<BattleEntity> _turnList = new List<BattleEntity>();
-    BattleUnit _playerUnit;
-    BattleUnit _enemyUnit;
+    public List<BattleEntity> _turnList = new List<BattleEntity>();
+    [HideInInspector] public BattleUnit PlayerUnit;
+    [HideInInspector] public BattleUnit EnemyUnit;
 
-    int _currentRound;
-    int _currentTurn;
+    public int _currentRound;
+    public int _currentTurn;
+
+    void Start() {
+        _battleCamera = GameObject.FindGameObjectWithTag("BattleCamera").GetComponent<Camera>();
+        PositionSetup();
+    }
 
     public void StartBattle(BattleUnit attacker, BattleUnit defender) {
         DungeonController.Instance.StartBattle();
         _currentRound = 1;
         _currentTurn = 0;
 
-        _playerUnit = attacker.IsPlayer ? attacker : defender;
-        _enemyUnit  = attacker.IsPlayer ? defender : attacker;
+        PlayerUnit = attacker.IsPlayer ? attacker : defender;
+        EnemyUnit  = attacker.IsPlayer ? defender : attacker;
 
         BuildTurnList();
-        PlaceEntities(_playerUnit, _playerPositions);
-        PlaceEntities(_enemyUnit, _enemyPositions);
+        PlaceEntities(PlayerUnit, _playerPositions);
+        PlaceEntities(EnemyUnit, _enemyPositions);
 
+        BattleUI.Instance.SetupHealthText(PlayerUnit.GetEntities());
+        BattleUI.Instance.ToggleUI();
+
+        _battleCamera.enabled = true;
         _turnList[_currentTurn].StartTurn();
     }
 
@@ -45,13 +60,25 @@ public class BattleController : MonoBehaviour {
     }
 
     void BuildTurnList() {
-        _turnList = _playerUnit.GetEntities().Concat(_enemyUnit.GetEntities()).ToList();
+        _turnList = PlayerUnit.GetEntities().Concat(EnemyUnit.GetEntities()).ToList();
         _turnList.Sort( (e1, e2) => e2.GetSpeed().CompareTo(e1.GetSpeed()) );
     }
 
     void PlaceEntities(BattleUnit unit, Vector2[] positions) {
         for (int i = 0; i < unit.GetEntities().Length; i++) {
-            unit.GetEntityAtPosition(i).transform.position = positions[i];
+            BattleEntity entity = unit.GetEntityAtPosition(i);
+            entity.transform.position = positions[i];
+            entity.GetComponent<SpriteRenderer>().enabled = true;
+        }
+    }
+
+    void HideEntities() {
+        for (int i = 0; i < PlayerUnit.GetEntities().Length; i++) {
+            PlayerUnit.GetEntityAtPosition(i).GetComponent<SpriteRenderer>().enabled = false;
+        }
+
+        for (int i = 0; i < EnemyUnit.GetEntities().Length; i++) {
+            EnemyUnit.GetEntityAtPosition(i).GetComponent<SpriteRenderer>().enabled = false;
         }
     }
 
@@ -59,21 +86,39 @@ public class BattleController : MonoBehaviour {
         if (battleWon) {
             //earn items, exp
         }
-        //Close battle window
-        DungeonController.Instance.EndBattle();
+        _battleCamera.enabled = false;
+        HideEntities();
+        BattleUI.Instance.ToggleUI();
         _turnList.Clear();
+        StartCoroutine(EndBattleScreen());
+    }
+
+    void PositionSetup() {
+        int x;
+        int y = FIRST_POSITION_Y;
+        int enemyPositionX = PLAYER_POSITION_X + TILES_BETWEEN_TEAMS;
+
+        for (int i = 0; i < 5; i++) {
+            y += 1;
+
+            x = i % 2 == 0 ? PLAYER_POSITION_X : PLAYER_POSITION_X - 1;
+            _playerPositions[i] = new Vector2(x, y);
+
+            x = i % 2 == 0 ? enemyPositionX : enemyPositionX - 1;
+            _enemyPositions[i] = new Vector2(x, y);
+        }
     }
 
     bool BattleStatusCheck() {
-        if (CheckIfUnitIsDead(_playerUnit)) {
-            _playerUnit.SetAsDead();
+        if (CheckIfUnitIsDead(PlayerUnit)) {
+            PlayerUnit.SetAsDead();
             DungeonController.Instance.GameOver();
             return true;
         }
-        else if (CheckIfUnitIsDead(_enemyUnit)) {
-            _enemyUnit.SetAsDead();
-            DungeonController.Instance.RemoveBattleUnit(_enemyUnit.gameObject);
-            Destroy(_enemyUnit.gameObject);
+        else if (CheckIfUnitIsDead(EnemyUnit)) {
+            EnemyUnit.SetAsDead();
+            DungeonController.Instance.RemoveBattleUnit(EnemyUnit.gameObject);
+            Destroy(EnemyUnit.gameObject);
             EndBattle(true);
             return true;
         }
@@ -96,6 +141,11 @@ public class BattleController : MonoBehaviour {
             _currentRound++;
             _currentTurn = 0;
         }
+    }
+
+    IEnumerator EndBattleScreen() {
+        yield return new WaitForSeconds(END_BATTLE_SCREEN_TIME);
+        DungeonController.Instance.EndBattle();
     }
 
     void Awake() {

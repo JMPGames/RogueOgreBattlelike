@@ -9,6 +9,13 @@ public class PlayerUnit : BattleUnit {
 
     void Start() {
         IsPlayer = true;
+        BattleUI.Instance.SetupTitleTexts(GetEntities());
+    }
+
+    void Update() {
+        if (_inputState == InputState.ACTION && DungeonController.Instance.DungeonState == DungeonState.MOVE) {
+            ActionInput();
+        }
     }
 
     public override void StartTurn() {
