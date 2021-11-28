@@ -10,7 +10,7 @@ public class EnemyBattleEntity : BattleEntity {
 
     IEnumerator test() {
         yield return new WaitForSeconds(1);
-        BattleController.Instance.PlayerUnit.GetEntityAtPosition(0).LoseHealth(5);
-        EndTurn();
+        BattleEntity target = BattleController.Instance.PlayerUnit.GetEntityAtPosition(0);
+        BasicAttack(target);
     }
 }

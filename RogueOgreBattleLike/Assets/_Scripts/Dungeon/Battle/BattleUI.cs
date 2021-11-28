@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public enum BattleUIState { IDLE, FREE_TARGET, LOCKED_TARGET }
+public enum BattleOptionState { IDLE, ATTACKING, SELECTING_USABLE, TARGETING_USABLE, DEFENDING }
 
 [RequireComponent(typeof(BattleUIInput))]
 public class BattleUI : MonoBehaviour {
@@ -13,13 +14,37 @@ public class BattleUI : MonoBehaviour {
     [SerializeField] Button[] _buttons;
 
     public BattleUIState BattleUIState { get; private set; }
-    BattleEntity _currentEntity;
-    public int _targetSelection;
-    public List<GameObject> _activeTargetSelectors = new List<GameObject>();
+    public BattleOptionState BattleOptionState { get; private set; }
+    public BattleEntity CurrentEntity { get; private set; }
+
+    IUsable _objectBeingUsed;
+    int _targetSelection;
+    int _uiSelection;
+
+    List<BattleEntity> _entityList = new List<BattleEntity>();
+    List<GameObject> _activeTargetSelectors = new List<GameObject>();
+
+    public BattleEntity CurrentTarget() => _entityList[_targetSelection];
+
+    public void AddToEntityList(BattleEntity entity) {
+        _entityList.Add(entity);
+    }
 
     public void ToggleUI(bool show = true) {
         _battleUIPanel.SetActive(show);
+        BattleUIState = BattleUIState.IDLE;
+        BattleOptionState = BattleOptionState.IDLE;
         _targetSelection = 0;
+        _uiSelection = 0;
+        ResetTargetSelectors();
+    }
+
+    public void SetToUseObject(IUsable obj) {
+        BattleOptionState = BattleOptionState.TARGETING_USABLE;
+        _objectBeingUsed = obj;
+        BattleUnit targetUnit = obj.TargetsEnemy ? 
+            BattleController.Instance.EnemyUnit : BattleController.Instance.PlayerUnit;
+        ToggleTargetSelector(true, targetUnit, obj.TargetsAll);
     }
 
     public void ToggleTargetSelector(bool show = false, BattleUnit targetUnit = null, bool targetAll = false) { 
@@ -32,16 +57,13 @@ public class BattleUI : MonoBehaviour {
             }
             else {
                 _targetSelection = targetUnit.IsPlayer ? 0 : BattleController.Instance.PlayerUnit.GetEntities().Length;
-                BattleEntity target = BattleController.Instance.GetEntityFromListAtIndex(_targetSelection);
+                BattleEntity target = CurrentTarget();
                 _activeTargetSelectors.Add(target.ToggleTargetIcon());
                 BattleUIState = BattleUIState.FREE_TARGET;
             }
         }
         else {
-            foreach(GameObject ts in _activeTargetSelectors) {
-                ts.SetActive(false);
-            }
-            _activeTargetSelectors.Clear();
+            ResetTargetSelectors();
             BattleUIState = BattleUIState.IDLE;
         }
     }
@@ -50,27 +72,34 @@ public class BattleUI : MonoBehaviour {
         _activeTargetSelectors[0].SetActive(false);
         _activeTargetSelectors.Clear();
         AdjustTargetSelectorHelper(increased);
-        while (BattleController.Instance.GetEntityFromListAtIndex(_targetSelection).IsDead()) {            
+        while (CurrentTarget().IsDead()) {            
             AdjustTargetSelectorHelper(increased);
         }
-        _activeTargetSelectors.Add(BattleController.Instance.GetEntityFromListAtIndex(_targetSelection).ToggleTargetIcon());
+        _activeTargetSelectors.Add(CurrentTarget().ToggleTargetIcon());
     }
 
     void AdjustTargetSelectorHelper(bool increased = true) {
         _targetSelection += increased ? 1 : -1;
-        if (_targetSelection >= BattleController.Instance.AmountOfEntities()) {
+        if (_targetSelection >= _entityList.Count) {
             _targetSelection = 0;
         }
         else if (_targetSelection < 0) {
-            _targetSelection = BattleController.Instance.AmountOfEntities() - 1;
+            _targetSelection = _entityList.Count - 1;
         }
+    }
+
+    void ResetTargetSelectors() {
+        foreach (GameObject ts in _activeTargetSelectors) {
+            ts.SetActive(false);
+        }
+        _activeTargetSelectors.Clear();
     }
 
     public void ToggleButtons(bool activate = false, BattleEntity entity = null) {
         for (int i = 0; i < _buttons.Length; i++) {
             _buttons[i].interactable = activate;
         }
-        _currentEntity = entity;
+        CurrentEntity = entity;
     }
 
     public void SetupTitleTexts(BattleEntity[] entities) {
@@ -91,19 +120,32 @@ public class BattleUI : MonoBehaviour {
     }
 
     public void AttackButton() {
-        ToggleTargetSelector(true, BattleController.Instance.EnemyUnit);
+        ToggleOptionState(BattleOptionState.ATTACKING);
+        if (BattleOptionState == BattleOptionState.ATTACKING) {
+            ToggleTargetSelector(true, BattleController.Instance.EnemyUnit);
+        }
+        else {
+            ToggleTargetSelector();
+        }
     }
 
     public void SkillsButton() {
-
+        ToggleOptionState(BattleOptionState.SELECTING_USABLE);
+        ToggleTargetSelector();
     }
 
     public void ItemButton() {
-
+        ToggleOptionState(BattleOptionState.SELECTING_USABLE);
+        ToggleTargetSelector();
     }
 
     public void DefendButton() {
-        _currentEntity.EndTurn();
+        ToggleOptionState(BattleOptionState.DEFENDING);
+        ToggleTargetSelector();
+    }
+
+    void ToggleOptionState(BattleOptionState newState) {
+        BattleOptionState = BattleOptionState == newState ? BattleOptionState.IDLE : newState;
     }
 
     void Awake() {

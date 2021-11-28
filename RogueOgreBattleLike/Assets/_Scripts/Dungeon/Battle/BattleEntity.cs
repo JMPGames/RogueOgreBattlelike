@@ -6,6 +6,7 @@ public class BattleEntity : BaseEntity {
     [SerializeField] int _speed;
     [SerializeField] GameObject _targetIcon;
 
+    public SpriteRenderer Renderer { get; private set; }
     public int Id { get; set; }
     public int Health { get; private set; }
     public int GetSpeed() => _speed;
@@ -14,6 +15,10 @@ public class BattleEntity : BaseEntity {
     void Awake() {
         Id = -1;
         Health = _maxHealth;
+    }
+
+    void Start() {
+        Renderer = GetComponent<SpriteRenderer>();
     }
 
     public void LoseHealth(int amount) {
@@ -33,5 +38,11 @@ public class BattleEntity : BaseEntity {
     }
 
     public virtual void StartTurn() { }
+    public virtual void BasicAttack(BattleEntity target) {
+        target.LoseHealth(5);
+        DungeonLog.Instance.CreateLog($"{GetTitle()} attacked {target.GetTitle()} for {5} damage.", Color.red);
+        EndTurn();
+    }
+    public virtual void Defend() { EndTurn(); }
     public virtual void EndTurn() { BattleController.Instance.NextTurn(); }
 }
