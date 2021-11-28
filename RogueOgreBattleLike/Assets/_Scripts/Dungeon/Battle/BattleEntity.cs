@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class BattleEntity : BaseEntity {
     //[SerializeField] Skill[] skills = new Skill[4];
     [SerializeField] int _maxHealth;
     [SerializeField] int _speed;
+    [SerializeField] GameObject _targetIcon;
 
     public int Id { get; set; }
     public int Health { get; private set; }
@@ -26,6 +25,11 @@ public class BattleEntity : BaseEntity {
         if (Id >= 0) {
             BattleUI.Instance.UpdateHealthText(Id, Health);
         }
+    }
+
+    public GameObject ToggleTargetIcon(bool show = true) {
+        _targetIcon.SetActive(show);
+        return _targetIcon;
     }
 
     public virtual void StartTurn() { }

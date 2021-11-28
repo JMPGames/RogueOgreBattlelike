@@ -15,12 +15,15 @@ public class BattleController : MonoBehaviour {
     Vector2[] _enemyPositions = new Vector2[5];
     Vector2[] _playerPositions = new Vector2[5];
 
-    public List<BattleEntity> _turnList = new List<BattleEntity>();
-    [HideInInspector] public BattleUnit PlayerUnit;
-    [HideInInspector] public BattleUnit EnemyUnit;
+    List<BattleEntity> _turnList = new List<BattleEntity>();
+    List<BattleEntity> _entityList = new List<BattleEntity>();
+    public BattleUnit PlayerUnit { get; private set; }
+    public BattleUnit EnemyUnit { get; private set; }
 
-    public int _currentRound;
-    public int _currentTurn;
+    int _currentRound;
+    int _currentTurn;
+
+    public int AmountOfEntities() => _entityList.Count;
 
     void Start() {
         _battleCamera = GameObject.FindGameObjectWithTag("BattleCamera").GetComponent<Camera>();
@@ -36,6 +39,8 @@ public class BattleController : MonoBehaviour {
         EnemyUnit  = attacker.IsPlayer ? defender : attacker;
 
         BuildTurnList();
+        
+        // ALWAYS "Place" THE PLAYER UNIT FIRST
         PlaceEntities(PlayerUnit, _playerPositions);
         PlaceEntities(EnemyUnit, _enemyPositions);
 
@@ -59,6 +64,10 @@ public class BattleController : MonoBehaviour {
         _turnList[_currentTurn].StartTurn();
     }
 
+    public BattleEntity GetEntityFromListAtIndex(int index) {
+        return _entityList[index];
+    }
+
     void BuildTurnList() {
         _turnList = PlayerUnit.GetEntities().Concat(EnemyUnit.GetEntities()).ToList();
         _turnList.Sort( (e1, e2) => e2.GetSpeed().CompareTo(e1.GetSpeed()) );
@@ -67,6 +76,7 @@ public class BattleController : MonoBehaviour {
     void PlaceEntities(BattleUnit unit, Vector2[] positions) {
         for (int i = 0; i < unit.GetEntities().Length; i++) {
             BattleEntity entity = unit.GetEntityAtPosition(i);
+            _entityList.Add(entity);
             entity.transform.position = positions[i];
             entity.GetComponent<SpriteRenderer>().enabled = true;
         }
