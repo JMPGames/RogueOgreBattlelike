@@ -24,6 +24,7 @@ public class BattleController : MonoBehaviour {
     int _currentTurn;
 
     public int AmountOfEntities() => _entityList.Count;
+    public BattleEntity GetEntityFromListAtIndex(int index) => _entityList[index];
 
     void Start() {
         _battleCamera = GameObject.FindGameObjectWithTag("BattleCamera").GetComponent<Camera>();
@@ -62,10 +63,6 @@ public class BattleController : MonoBehaviour {
             return;
         }
         _turnList[_currentTurn].StartTurn();
-    }
-
-    public BattleEntity GetEntityFromListAtIndex(int index) {
-        return _entityList[index];
     }
 
     void BuildTurnList() {
