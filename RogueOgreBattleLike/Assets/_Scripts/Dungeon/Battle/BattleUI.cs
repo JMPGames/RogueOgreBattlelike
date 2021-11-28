@@ -41,6 +41,7 @@ public class BattleUI : MonoBehaviour {
             foreach(GameObject ts in _activeTargetSelectors) {
                 ts.SetActive(false);
             }
+            _activeTargetSelectors.Clear();
             BattleUIState = BattleUIState.IDLE;
         }
     }
