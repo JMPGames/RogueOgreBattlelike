@@ -15,15 +15,10 @@ public class BattleUIInput : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.E)) {
             if (BattleUI.Instance.BattleOptionState == BattleOptionState.ATTACKING) {
-                Debug.Log("BASIC ATTACK");
                 BattleUI.Instance.CurrentEntity.BasicAttack(BattleUI.Instance.CurrentTarget());
             }
             else if (BattleUI.Instance.BattleOptionState == BattleOptionState.TARGETING_USABLE) {
                 Debug.Log("USING ITEM / USING SKILL");
-            }
-            else if (BattleUI.Instance.BattleOptionState == BattleOptionState.DEFENDING) {
-                Debug.Log("DEFENDING");
-                BattleUI.Instance.CurrentEntity.Defend();
             }
         }
     }

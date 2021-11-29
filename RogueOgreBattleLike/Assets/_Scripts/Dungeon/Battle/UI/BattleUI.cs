@@ -109,6 +109,11 @@ public class BattleUI : MonoBehaviour {
         }
     }
 
+    public void ToggleTurnIndication(int id, bool startOfTurn = true) {
+        _titleTexts[id].color = startOfTurn ? Color.blue : Color.black;
+        _healthTexts[id].color = startOfTurn ? Color.blue : Color.black;
+    }
+
     public void SetupHealthText(BattleEntity[] entities) {
         for (int i = 0; i < entities.Length; i++) {
             _healthTexts[i].text = entities[i].Health.ToString();
@@ -140,8 +145,9 @@ public class BattleUI : MonoBehaviour {
     }
 
     public void DefendButton() {
-        ToggleOptionState(BattleOptionState.DEFENDING);
-        ToggleTargetSelector();
+        //ToggleOptionState(BattleOptionState.DEFENDING);
+        //ToggleTargetSelector();
+        CurrentEntity.Defend();
     }
 
     void ToggleOptionState(BattleOptionState newState) {
